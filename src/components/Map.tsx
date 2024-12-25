@@ -1,13 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import axios from 'axios';
-import L from 'leaflet';
-import './Map.css';
+import React, { useEffect, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  LayersControl,
+  useMap,
+} from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import axios from "axios";
+import L from "leaflet";
+import "./Map.css";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-import ImageWithLightbox from './ImageWithLightbox.tsx';
-import { ImageData } from '../types';
+import ImageWithLightbox from "./ImageWithLightbox.tsx";
+import { ImageData } from "../types";
 
 const Map: React.FC = () => {
   const [images, setImages] = useState<ImageData[]>([]);
@@ -20,17 +27,21 @@ const Map: React.FC = () => {
 
   const fetchImages = async () => {
     try {
-      const response = await axios.get('http://localhost:1337/api/images?populate=*');
+      const response = await axios.get(
+        "http://localhost:1337/api/images?populate=*"
+      );
       const fetchedImages = response.data.data;
       setImages(fetchedImages);
-      
-      const types = [...new Set(fetchedImages.map((image: ImageData) => image.type))];
+
+      const types = [
+        ...new Set(fetchedImages.map((image: ImageData) => image.type)),
+      ];
       setUniqueTypes(types);
       setSelectedTypes(new Set(types)); // Initially select all types
-      
+
       setLoading(false);
     } catch (err) {
-      setError('Failed to fetch images');
+      setError("Failed to fetch images");
       setLoading(false);
       console.error(err);
     }
@@ -41,19 +52,22 @@ const Map: React.FC = () => {
   }, []);
 
   const openLightbox = (imageUrl: string) => {
-    const selectedImages = images.filter(img => selectedTypes.has(img.type));
-    const index = selectedImages.findIndex(img => `http://localhost:1337${img.image.formats.large.url}` === imageUrl);
+    const selectedImages = images.filter((img) => selectedTypes.has(img.type));
+    const index = selectedImages.findIndex(
+      (img) =>
+        `http://localhost:1337${img.image.formats.large.url}` === imageUrl
+    );
     setCurrentImageIndex(index);
     setLightboxOpen(true);
   };
 
   const handleOverlayChange = (e: L.LayersControlEvent) => {
     const { name, type } = e;
-    setSelectedTypes(prev => {
+    setSelectedTypes((prev) => {
       const newSet = new Set(prev);
-      if (type === 'overlayadd') {
+      if (type === "overlayadd") {
         newSet.add(name);
-      } else if (type === 'overlayremove') {
+      } else if (type === "overlayremove") {
         newSet.delete(name);
       }
       return newSet;
@@ -63,9 +77,9 @@ const Map: React.FC = () => {
   const LayersControlEventHandler = () => {
     const map = useMap();
     useEffect(() => {
-      map.on('overlayadd overlayremove', handleOverlayChange);
+      map.on("overlayadd overlayremove", handleOverlayChange);
       return () => {
-        map.off('overlayadd overlayremove', handleOverlayChange);
+        map.off("overlayadd overlayremove", handleOverlayChange);
       };
     }, [map]);
     return null;
@@ -74,63 +88,76 @@ const Map: React.FC = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
-  const selectedImages = images.filter(img => selectedTypes.has(img.type));
-  const slides = selectedImages.map(img => ({ src: `http://localhost:1337${img.image.formats.large.url}` }));
+  const selectedImages = images.filter((img) => selectedTypes.has(img.type));
+  const slides = selectedImages.map((img) => ({
+    src: `http://localhost:1337${img.image.formats.large.url}`,
+  }));
 
   return (
-    <MapContainer center={[0, 0]} zoom={2} scrollWheelZoom={true} style={{ height: '100vh', width: '100%' }}>
-      <TileLayer 
+    <MapContainer
+      center={[0, 0]}
+      zoom={2}
+      scrollWheelZoom={true}
+      style={{ height: "100vh", width: "100%" }}
+    >
+      <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       <LayersControl position="topright">
-        {uniqueTypes.map(type => (
+        {uniqueTypes.map((type) => (
           <LayersControl.Overlay key={type} name={type} checked>
-            {images.filter(image => image.type === type).map(image => {
+            {images
+              .filter((image) => image.type === type)
+              .map((image) => {
                 const customIcon = L.divIcon({
-                    className: 'rounded-icon',
-                    html: `<img src="http://localhost:1337${image.image.formats.small.url}" style="width: 26px; height: 26px; border-radius: 25%;">`,
-                    iconSize: [26, 26],
-                    iconAnchor: [13, 26],
-                    popupAnchor: [0, -26],
+                  className: "rounded-icon",
+                  html: `<img src="http://localhost:1337${image.image.formats.small.url}" style="width: 26px; height: 26px; border-radius: 25%;">`,
+                  iconSize: [26, 26],
+                  iconAnchor: [13, 26],
+                  popupAnchor: [0, -26],
                 });
 
-              return (
-                <Marker 
-                  key={image.documentId}
-                  position={[image.location.lat, image.location.lng]}
-                  icon={customIcon}
-                >
-                  <Popup minWidth="300px" className="popup">
-                    <h3>{image.locationName}</h3>
-                    {image.image?.formats && (
-                      <ImageWithLightbox
-                        src={`http://localhost:1337${image.image.formats.large.url}`}
-                        alt={image.locationName}
-                        openLightbox={openLightbox}
-                      />
-                    )}
-                    {image.description.map((para, index) => (
-                      <p key={index}>
-                        {para.children.map((child, childIndex) => (
-                          <span 
-                            key={childIndex} 
-                            style={{
-                              fontWeight: child.bold ? 'bold' : 'normal',
-                              fontStyle: child.italic ? 'italic' : 'normal',
-                              textDecoration: child.underline ? 'underline' : 'none'
-                            }}
-                          >
-                            {child.text}
-                          </span>
-                        ))}
+                return (
+                  <Marker
+                    key={image.documentId}
+                    position={[image.location.lat, image.location.lng]}
+                    icon={customIcon}
+                  >
+                    <Popup minWidth="300px" className="popup">
+                      <h3>{image.locationName}</h3>
+                      {image.image?.formats && (
+                        <ImageWithLightbox
+                          src={`http://localhost:1337${image.image.formats.large.url}`}
+                          alt={image.locationName}
+                          openLightbox={openLightbox}
+                        />
+                      )}
+                      {image.description.map((para, index) => (
+                        <p key={index}>
+                          {para.children.map((child, childIndex) => (
+                            <span
+                              key={childIndex}
+                              style={{
+                                fontWeight: child.bold ? "bold" : "normal",
+                                fontStyle: child.italic ? "italic" : "normal",
+                                textDecoration: child.underline
+                                  ? "underline"
+                                  : "none",
+                              }}
+                            >
+                              {child.text}
+                            </span>
+                          ))}
+                        </p>
+                      ))}
+                      <p className="imageType">
+                        <i>{image.type}</i>
                       </p>
-                    ))}
-                    <p className="imageType"><i>{image.type}</i></p>
-                  </Popup>
-                </Marker>
-              );
-            })}
+                    </Popup>
+                  </Marker>
+                );
+              })}
           </LayersControl.Overlay>
         ))}
       </LayersControl>
@@ -140,8 +167,8 @@ const Map: React.FC = () => {
         close={() => setLightboxOpen(false)}
         slides={slides}
         index={currentImageIndex}
-      />  
-    </MapContainer>    
+      />
+    </MapContainer>
   );
 };
 
