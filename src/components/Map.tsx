@@ -15,6 +15,7 @@ import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import ImageWithLightbox from "./ImageWithLightbox.tsx";
 import { ImageData } from "../types";
+import MarkerClusterGroup from "react-leaflet-cluster";
 
 const Map: React.FC = () => {
   const [images, setImages] = useState<ImageData[]>([]);
@@ -107,57 +108,61 @@ const Map: React.FC = () => {
       <LayersControl position="topright">
         {uniqueTypes.map((type) => (
           <LayersControl.Overlay key={type} name={type} checked>
-            {images
-              .filter((image) => image.type === type)
-              .map((image) => {
-                const customIcon = L.divIcon({
-                  className: "rounded-icon",
-                  html: `<img src="http://localhost:1337${image.image.formats.small.url}" style="width: 26px; height: 26px; border-radius: 25%;">`,
-                  iconSize: [26, 26],
-                  iconAnchor: [13, 26],
-                  popupAnchor: [0, -26],
-                });
+            <MarkerClusterGroup chunkedLoading>
+              {images
+                .filter(
+                  (image) => image.type === type && selectedTypes.has(type)
+                )
+                .map((image) => {
+                  const customIcon = L.divIcon({
+                    className: "rounded-icon",
+                    html: `<img src="http://localhost:1337${image.image.formats.small.url}" style="width: 26px; height: 26px; border-radius: 25%;">`,
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 26],
+                    popupAnchor: [0, -26],
+                  });
 
-                return (
-                  <Marker
-                    key={image.documentId}
-                    position={[image.location.lat, image.location.lng]}
-                    icon={customIcon}
-                  >
-                    <Popup minWidth="300px" className="popup">
-                      <h3>{image.locationName}</h3>
-                      {image.image?.formats && (
-                        <ImageWithLightbox
-                          src={`http://localhost:1337${image.image.formats.large.url}`}
-                          alt={image.locationName}
-                          openLightbox={openLightbox}
-                        />
-                      )}
-                      {image.description.map((para, index) => (
-                        <p key={index}>
-                          {para.children.map((child, childIndex) => (
-                            <span
-                              key={childIndex}
-                              style={{
-                                fontWeight: child.bold ? "bold" : "normal",
-                                fontStyle: child.italic ? "italic" : "normal",
-                                textDecoration: child.underline
-                                  ? "underline"
-                                  : "none",
-                              }}
-                            >
-                              {child.text}
-                            </span>
-                          ))}
+                  return (
+                    <Marker
+                      key={image.documentId}
+                      position={[image.location.lat, image.location.lng]}
+                      icon={customIcon}
+                    >
+                      <Popup minWidth="300px" className="popup">
+                        <h3>{image.locationName}</h3>
+                        {image.image?.formats && (
+                          <ImageWithLightbox
+                            src={`http://localhost:1337${image.image.formats.large.url}`}
+                            alt={image.locationName}
+                            openLightbox={openLightbox}
+                          />
+                        )}
+                        {image.description.map((para, index) => (
+                          <p key={index}>
+                            {para.children.map((child, childIndex) => (
+                              <span
+                                key={childIndex}
+                                style={{
+                                  fontWeight: child.bold ? "bold" : "normal",
+                                  fontStyle: child.italic ? "italic" : "normal",
+                                  textDecoration: child.underline
+                                    ? "underline"
+                                    : "none",
+                                }}
+                              >
+                                {child.text}
+                              </span>
+                            ))}
+                          </p>
+                        ))}
+                        <p className="imageType">
+                          <i>{image.type}</i>
                         </p>
-                      ))}
-                      <p className="imageType">
-                        <i>{image.type}</i>
-                      </p>
-                    </Popup>
-                  </Marker>
-                );
-              })}
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+            </MarkerClusterGroup>
           </LayersControl.Overlay>
         ))}
       </LayersControl>
