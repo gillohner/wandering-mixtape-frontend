@@ -4,6 +4,9 @@ import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import L from 'leaflet';
 import './Map.css';
+import { FaExpand } from 'react-icons/fa';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 interface ImageData {
     id: number;
@@ -32,6 +35,13 @@ const Map = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [uniqueTypes, setUniqueTypes] = useState<string[]>([]);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [currentImage, setCurrentImage] = useState(null);
+    
+    const openLightbox = (imageUrl) => {
+        setCurrentImage(imageUrl);
+        setLightboxOpen(true);
+    };
 
     const fetchImages = async () => {
         try {
@@ -81,14 +91,29 @@ const Map = () => {
                                     position={[image.location.lat, image.location.lng]}
                                     icon={customIcon}
                                 >
-                                    <Popup minWidth="420px" className="popup">
+                                    <Popup minWidth="300px" className="popup">
                                         <h3>{image.locationName}</h3>
                                         {image.image?.formats && (
-                                            <img 
+                                            <div style={{ position: 'relative', display: 'inline-block' }}>
+                                                <img 
                                                 src={`http://localhost:1337${image.image.formats.large.url}`}
                                                 alt={image.locationName}
-                                                style={{ maxWidth: '400px' }}
-                                            />
+                                                style={{ maxWidth: '280px' }}
+                                                />
+                                                <FaExpand 
+                                                    style={{
+                                                        position: 'absolute',
+                                                        bottom: '10px',
+                                                        right: '10px',
+                                                        cursor: 'pointer',
+                                                        color: 'white',
+                                                        backgroundColor: 'rgba(0,0,0,0.5)',
+                                                        padding: '5px',
+                                                        borderRadius: '5px'
+                                                    }}
+                                                    onClick={() => openLightbox(`http://localhost:1337${image.image.formats.large.url}`)}
+                                                />
+                                            </div>
                                         )}
                                         {image.description.map((para, index) => (
                                             <p key={index}>
@@ -114,7 +139,13 @@ const Map = () => {
                     </LayersControl.Overlay>
                 ))}
             </LayersControl>
-        </MapContainer>
+            <Lightbox
+                open={lightboxOpen}
+                close={() => setLightboxOpen(false)}
+                slides={[{ src: currentImage }]}
+        
+            />  
+        </MapContainer>    
     );
 };
 
