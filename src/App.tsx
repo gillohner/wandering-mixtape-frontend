@@ -1,7 +1,7 @@
 // src/App.tsx
 import React from 'react';
 import './App.css';
-import Map from './Map.tsx';
+import Map from './components/Map.tsx';
 
 const App = () => {
     return (
