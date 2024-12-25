@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import L from 'leaflet';
+import './Map.css';
 
 interface ImageData {
     id: number;
@@ -23,6 +24,7 @@ interface ImageData {
             };
         };
     };
+    type: string;
 }
 
 const Map = () => {
@@ -50,54 +52,57 @@ const Map = () => {
     if (error) return <div>{error}</div>;
 
     return (
-        <MapContainer center={[0, 0]} zoom={2} style={{ height: '100vh', width: '100%' }}>
+        <MapContainer center={[0, 0]} zoom={2} scrollWheelZoom={true} style={{ height: '100vh', width: '100%' }}>
             <TileLayer 
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-            {images.map(image => {
-                const customIcon = L.icon({
-                    iconUrl: `http://localhost:1337${image.image.formats.small.url}`,
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 32],
-                    popupAnchor: [0, -32]
-                });
+            <LayersControl position="topright">
+                {images.map(image => {
+                    const customIcon = L.icon({
+                        iconUrl: `http://localhost:1337${image.image.formats.small.url}`,
+                        iconSize: [46, 46],
+                        iconAnchor: [23, 46],
+                        popupAnchor: [0, -46],
+                    });
 
-                return (
-                    <Marker 
-                        key={image.documentId}
-                        position={[image.location.lat, image.location.lng]}
-                        icon={customIcon}
-                    >
-                        <Popup>
-                            <h3>{image.locationName}</h3>
-                            {image.image?.formats && (
-                                <img 
-                                    src={`http://localhost:1337${image.image.formats.large.url}`}
-                                    alt={image.locationName}
-                                    style={{ maxWidth: '200px' }}
-                                />
-                            )}
-                            {image.description.map((para, index) => (
-                                <p key={index}>
-                                    {para.children.map((child, childIndex) => (
-                                        <span 
-                                            key={childIndex} 
-                                            style={{
-                                                fontWeight: child.bold ? 'bold' : 'normal',
-                                                fontStyle: child.italic ? 'italic' : 'normal',
-                                                textDecoration: child.underline ? 'underline' : 'none'
-                                            }}
-                                        >
-                                            {child.text}
-                                        </span>
-                                    ))}
-                                </p>
-                            ))}
-                        </Popup>
-                    </Marker>
-                );
-            })}
+                    return (
+                        <Marker 
+                            key={image.documentId}
+                            position={[image.location.lat, image.location.lng]}
+                            icon={customIcon}
+                        >
+                            <Popup minWidth="420px" className="popup">
+                                <h3>{image.locationName}</h3>
+                                {image.image?.formats && (
+                                    <img 
+                                        src={`http://localhost:1337${image.image.formats.large.url}`}
+                                        alt={image.locationName}
+                                        style={{ maxWidth: '400px' }}
+                                    />
+                                )}
+                                {image.description.map((para, index) => (
+                                    <p key={index}>
+                                        {para.children.map((child, childIndex) => (
+                                            <span 
+                                                key={childIndex} 
+                                                style={{
+                                                    fontWeight: child.bold ? 'bold' : 'normal',
+                                                    fontStyle: child.italic ? 'italic' : 'normal',
+                                                    textDecoration: child.underline ? 'underline' : 'none'
+                                                }}
+                                            >
+                                                {child.text}
+                                            </span>
+                                        ))}
+                                    </p>
+                                ))}
+                                <p className="imageType"><i>{image.type}</i></p>
+                            </Popup>
+                        </Marker>
+                    );
+                })}
+            </LayersControl>
         </MapContainer>
     );
 };

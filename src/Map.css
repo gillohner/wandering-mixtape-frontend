@@ -1,0 +1,4 @@
+.popup .imageType {    
+    display: flex;
+    flex-direction: row-reverse;
+}
