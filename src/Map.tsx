@@ -31,11 +31,18 @@ const Map = () => {
     const [images, setImages] = useState<ImageData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [uniqueTypes, setUniqueTypes] = useState<string[]>([]);
 
     const fetchImages = async () => {
         try {
             const response = await axios.get('http://localhost:1337/api/images?populate=*');
-            setImages(response.data.data);
+            const fetchedImages = response.data.data;
+            setImages(fetchedImages);
+            
+            // Extract unique types
+            const types = [...new Set(fetchedImages.map((image: ImageData) => image.type))];
+            setUniqueTypes(types);
+            
             setLoading(false);
         } catch (err) {
             setError('Failed to fetch images');
@@ -58,50 +65,54 @@ const Map = () => {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
             <LayersControl position="topright">
-                {images.map(image => {
-                    const customIcon = L.icon({
-                        iconUrl: `http://localhost:1337${image.image.formats.small.url}`,
-                        iconSize: [46, 46],
-                        iconAnchor: [23, 46],
-                        popupAnchor: [0, -46],
-                    });
+                {uniqueTypes.map(type => (
+                    <LayersControl.Overlay key={type} name={type} checked>
+                        {images.filter(image => image.type === type).map(image => {
+                            const customIcon = L.icon({
+                                iconUrl: `http://localhost:1337${image.image.formats.small.url}`,
+                                iconSize: [46, 46],
+                                iconAnchor: [23, 46],
+                                popupAnchor: [0, -46],
+                            });
 
-                    return (
-                        <Marker 
-                            key={image.documentId}
-                            position={[image.location.lat, image.location.lng]}
-                            icon={customIcon}
-                        >
-                            <Popup minWidth="420px" className="popup">
-                                <h3>{image.locationName}</h3>
-                                {image.image?.formats && (
-                                    <img 
-                                        src={`http://localhost:1337${image.image.formats.large.url}`}
-                                        alt={image.locationName}
-                                        style={{ maxWidth: '400px' }}
-                                    />
-                                )}
-                                {image.description.map((para, index) => (
-                                    <p key={index}>
-                                        {para.children.map((child, childIndex) => (
-                                            <span 
-                                                key={childIndex} 
-                                                style={{
-                                                    fontWeight: child.bold ? 'bold' : 'normal',
-                                                    fontStyle: child.italic ? 'italic' : 'normal',
-                                                    textDecoration: child.underline ? 'underline' : 'none'
-                                                }}
-                                            >
-                                                {child.text}
-                                            </span>
+                            return (
+                                <Marker 
+                                    key={image.documentId}
+                                    position={[image.location.lat, image.location.lng]}
+                                    icon={customIcon}
+                                >
+                                    <Popup minWidth="420px" className="popup">
+                                        <h3>{image.locationName}</h3>
+                                        {image.image?.formats && (
+                                            <img 
+                                                src={`http://localhost:1337${image.image.formats.large.url}`}
+                                                alt={image.locationName}
+                                                style={{ maxWidth: '400px' }}
+                                            />
+                                        )}
+                                        {image.description.map((para, index) => (
+                                            <p key={index}>
+                                                {para.children.map((child, childIndex) => (
+                                                    <span 
+                                                        key={childIndex} 
+                                                        style={{
+                                                            fontWeight: child.bold ? 'bold' : 'normal',
+                                                            fontStyle: child.italic ? 'italic' : 'normal',
+                                                            textDecoration: child.underline ? 'underline' : 'none'
+                                                        }}
+                                                    >
+                                                        {child.text}
+                                                    </span>
+                                                ))}
+                                            </p>
                                         ))}
-                                    </p>
-                                ))}
-                                <p className="imageType"><i>{image.type}</i></p>
-                            </Popup>
-                        </Marker>
-                    );
-                })}
+                                        <p className="imageType"><i>{image.type}</i></p>
+                                    </Popup>
+                                </Marker>
+                            );
+                        })}
+                    </LayersControl.Overlay>
+                ))}
             </LayersControl>
         </MapContainer>
     );
