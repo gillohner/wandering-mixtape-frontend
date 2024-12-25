@@ -87,12 +87,13 @@ const Map: React.FC = () => {
         {uniqueTypes.map(type => (
           <LayersControl.Overlay key={type} name={type} checked>
             {images.filter(image => image.type === type).map(image => {
-              const customIcon = L.icon({
-                iconUrl: `http://localhost:1337${image.image.formats.small.url}`,
-                iconSize: [46, 46],
-                iconAnchor: [23, 46],
-                popupAnchor: [0, -46],
-              });
+                const customIcon = L.divIcon({
+                    className: 'rounded-icon',
+                    html: `<img src="http://localhost:1337${image.image.formats.small.url}" style="width: 26px; height: 26px; border-radius: 25%;">`,
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 26],
+                    popupAnchor: [0, -26],
+                });
 
               return (
                 <Marker 
