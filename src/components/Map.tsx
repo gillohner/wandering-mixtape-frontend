@@ -129,35 +129,37 @@ const Map: React.FC = () => {
                       icon={customIcon}
                     >
                       <Popup minWidth="300px" className="popup">
-                        <h3>{image.locationName}</h3>
-                        {image.image?.formats && (
-                          <ImageWithLightbox
-                            src={`https://wanderingmixedtape-admin.lohner.cloud${image.image.url}`}
-                            alt={image.locationName}
-                            openLightbox={openLightbox}
-                          />
-                        )}
-                        {image.description.map((para, index) => (
-                          <p key={index}>
-                            {para.children.map((child, childIndex) => (
-                              <span
-                                key={childIndex}
-                                style={{
-                                  fontWeight: child.bold ? "bold" : "normal",
-                                  fontStyle: child.italic ? "italic" : "normal",
-                                  textDecoration: child.underline
-                                    ? "underline"
-                                    : "none",
-                                }}
-                              >
-                                {child.text}
-                              </span>
-                            ))}
+                        <div style={{width: "280px"}}>
+                          <h3>{image.locationName}</h3>
+                          {image.image?.formats && (
+                            <ImageWithLightbox
+                              src={`https://wanderingmixedtape-admin.lohner.cloud${image.image.url}`}
+                              alt={image.locationName}
+                              openLightbox={openLightbox}
+                            />
+                          )}
+                          {image.description.map((para, index) => (
+                            <p key={index}>
+                              {para.children.map((child, childIndex) => (
+                                <span
+                                  key={childIndex}
+                                  style={{
+                                    fontWeight: child.bold ? "bold" : "normal",
+                                    fontStyle: child.italic ? "italic" : "normal",
+                                    textDecoration: child.underline
+                                      ? "underline"
+                                      : "none",
+                                  }}
+                                >
+                                  {child.text}
+                                </span>
+                              ))}
+                            </p>
+                          ))}
+                          <p className="imageType">
+                            <i>{image.type}</i>
                           </p>
-                        ))}
-                        <p className="imageType">
-                          <i>{image.type}</i>
-                        </p>
+                        </div>
                       </Popup>
                     </Marker>
                   );
