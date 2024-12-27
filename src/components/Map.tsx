@@ -29,7 +29,7 @@ const Map: React.FC = () => {
   const fetchImages = async () => {
     try {
       const response = await axios.get(
-        "https://wanderingmixedtape-admin.lohner.cloud/api/images?populate=*"
+        "https://wanderingmixedtape.lohner.cloud/admin/api/images?populate=*"
       );
       const fetchedImages = response.data.data;
       setImages(fetchedImages);
@@ -56,7 +56,7 @@ const Map: React.FC = () => {
     const selectedImages = images.filter((img) => selectedTypes.has(img.type));
     const index = selectedImages.findIndex(
       (img) =>
-        `https://wanderingmixedtape-admin.lohner.cloud${img.image.url}` === imageUrl
+        `https://wanderingmixedtape.lohner.cloud/admin${img.image.url}` === imageUrl
     );
     setCurrentImageIndex(index);
     setLightboxOpen(true);
@@ -91,7 +91,7 @@ const Map: React.FC = () => {
 
   const selectedImages = images.filter((img) => selectedTypes.has(img.type));
   const slides = selectedImages.map((img) => ({
-    src: `https://wanderingmixedtape-admin.lohner.cloud${img.image.url}`,
+    src: `https://wanderingmixedtape.lohner.cloud/admin${img.image.url}`,
   }));
 
   return (
@@ -116,7 +116,7 @@ const Map: React.FC = () => {
                 .map((image) => {
                   const customIcon = L.divIcon({
                     className: "rounded-icon",
-                    html: `<img src="https://wanderingmixedtape-admin.lohner.cloud${image.image.formats.small.url}" style="width: 26px; height: 26px; border-radius: 25%;">`,
+                    html: `<img src="https://wanderingmixedtape.lohner.cloud/admin${image.image.formats.small.url}" style="width: 26px; height: 26px; border-radius: 25%;">`,
                     iconSize: [26, 26],
                     iconAnchor: [13, 26],
                     popupAnchor: [0, -26],
@@ -133,7 +133,7 @@ const Map: React.FC = () => {
                           <h3>{image.locationName}</h3>
                           {image.image?.formats && (
                             <ImageWithLightbox
-                              src={`https://wanderingmixedtape-admin.lohner.cloud${image.image.url}`}
+                              src={`https://wanderingmixedtape.lohner.cloud/admin${image.image.url}`}
                               alt={image.locationName}
                               openLightbox={openLightbox}
                             />
