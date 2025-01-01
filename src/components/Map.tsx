@@ -27,29 +27,29 @@ const Map: React.FC = () => {
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
   const strapiUrl = process.env.REACT_APP_STRAPI_URL || 'http://localhost:1337';
   
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     try {
       const response = await axios.get(`${strapiUrl}/api/images?populate=*`);
       const fetchedImages = response.data.data;
       setImages(fetchedImages);
-
+  
       const types = [
         ...new Set(fetchedImages.map((image: ImageData) => image.type)),
       ];
       setUniqueTypes(types);
-      setSelectedTypes(new Set(types)); // Initially select all types
-
+      setSelectedTypes(new Set(types));
+  
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch images");
       setLoading(false);
       console.error(err);
     }
-  };
-
+  }, [strapiUrl]);
+  
   useEffect(() => {
     fetchImages();
-  }, []);
+  }, [fetchImages]);  
 
   const openLightbox = (imageUrl: string) => {
     const selectedImages = images.filter((img) => selectedTypes.has(img.type));
