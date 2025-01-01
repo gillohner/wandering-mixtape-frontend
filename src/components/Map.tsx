@@ -25,8 +25,8 @@ const Map: React.FC = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
-  const strapiUrl = 'http://localhost:1337';
-
+  const strapiUrl = process.env.REACT_APP_STRAPI_URL || 'http://localhost:1337';
+  
   const fetchImages = async () => {
     try {
       const response = await axios.get(
