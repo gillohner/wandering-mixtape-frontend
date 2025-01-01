@@ -29,9 +29,7 @@ const Map: React.FC = () => {
   
   const fetchImages = async () => {
     try {
-      const response = await axios.get(
-        "api/images?populate=*"
-      );
+      const response = await axios.get(`${strapiUrl}/api/images?populate=*`);
       const fetchedImages = response.data.data;
       setImages(fetchedImages);
 
